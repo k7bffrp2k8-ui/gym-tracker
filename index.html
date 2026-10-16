@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="ru"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Дневник тренировок</title>
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<link rel="manifest" href="manifest.webmanifest"><link rel="apple-touch-icon" href="icon-180.png"><link rel="icon" href="icon-192.png"><meta name="theme-color" content="#0a0a0b"><meta name="apple-mobile-web-app-title" content="Тренировки">
+<style>
+:root{--bg:#f5f6f8;--card:#fff;--tx:#14171a;--mu:#6b7280;--ac:#3b82f6;--bd:#e5e7eb;--ok:#16a34a;--bad:#dc2626;color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0e1013;--card:#181b20;--tx:#eceff3;--mu:#98a0ab;--bd:#2a2f37;--ac:#60a5fa;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#0e1013;--card:#181b20;--tx:#eceff3;--mu:#98a0ab;--bd:#2a2f37;--ac:#60a5fa;color-scheme:dark}
+*{box-sizing:border-box}html,body{margin:0}
+body{background:var(--bg);color:var(--tx);font:16px/1.4 -apple-system,system-ui,Segoe UI,Roboto,sans-serif;padding-bottom:90px}
+main{max-width:620px;margin:0 auto;padding:12px}
+nav{position:fixed;left:0;right:0;bottom:0;display:flex;background:var(--card);border-top:1px solid var(--bd);padding-bottom:env(safe-area-inset-bottom,0px);z-index:5}
+nav button{flex:1;padding:14px 4px;border:0;background:none;color:var(--mu);font-size:15px;font-weight:600}
+nav button.on{color:var(--ac)}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:12px;margin-bottom:12px}
+h2{margin:4px 0 12px;font-size:20px}h3{margin:0 0 4px;font-size:17px;color:var(--ac)}
+.mu{color:var(--mu);font-size:13px}
+.row{display:grid;grid-template-columns:28px 1fr 1fr 36px;gap:8px;align-items:center;margin-top:8px}
+input,select{width:100%;padding:10px;border:1px solid var(--bd);border-radius:10px;background:var(--bg);color:var(--tx);font-size:16px}
+button.b{padding:11px 14px;border-radius:10px;border:0;background:var(--ac);color:#fff;font-size:15px;font-weight:600}
+button.g{background:none;color:var(--ac);border:1px solid var(--bd)}
+button.x{background:none;border:0;color:var(--bad);font-size:20px}
+.full{width:100%;margin-top:8px}
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin:10px 0}
+.chips button{padding:7px 11px;border-radius:20px;border:1px solid var(--bd);background:none;color:var(--tx);font-size:13px}
+.chips button.on{background:var(--ac);color:#fff;border-color:var(--ac)}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.st{background:var(--bg);border-radius:10px;padding:10px}.st b{display:block;font-size:20px}
+.up{color:var(--ok)}.dn{color:var(--bad)}
+.ex{display:flex;gap:8px;align-items:center;padding:10px 0;border-bottom:1px solid var(--bd)}.ex span{flex:1}
+table{width:100%;border-collapse:collapse;font-size:13px}td,th{padding:6px 4px;border-bottom:1px solid var(--bd);text-align:left;vertical-align:top}
+svg text{fill:var(--mu);font-size:10px}
+.md{position:fixed;inset:0;background:rgba(0,0,0,.55);display:flex;align-items:center;justify-content:center;padding:20px;z-index:20}.mb{background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:16px;width:100%;max-width:360px}.mb p{margin:0 0 10px}
+:root,:root:not([data-theme="light"]),:root[data-theme="dark"]{--bg:#0a0a0b;--card:#151517;--tx:#fff;--mu:#8a8a90;--ac:#fff;--bd:#2a2a2e;color-scheme:dark}
+.card{border:0;border-radius:24px;padding:16px}.b,input,select{border-radius:14px}
+button.b:not(.g){color:#000}.chips button.on{color:#000}
+nav{background:rgba(21,21,23,.92);backdrop-filter:blur(12px);border:0}nav button{font-size:13px}nav button.on{color:#fff}
+h2{font-size:28px;font-weight:800}
+.cal{display:grid;grid-template-columns:repeat(7,1fr);gap:6px;text-align:center}.cal i{font-style:normal}.wd{color:var(--mu);font-size:12px;padding-bottom:4px}
+.day{aspect-ratio:1;border-radius:50%;border:1.5px solid transparent;background:none;color:var(--tx);font-size:16px;font-weight:600;padding:0}.day.d{border-color:var(--tx)}.day.s:not(.t){background:var(--bd)}.day.t{background:#fff;color:#000}
+:root{--hl:#e8552f}.gb{height:6px;border-radius:3px;background:var(--bd);margin-top:3px}.gb i{display:block;height:100%;border-radius:3px;background:var(--hl)}
+.mb{max-height:88vh;overflow:auto}
+</style></head><body>
+<main id="app"></main>
+<nav><button data-t="c">Календарь</button><button data-t="w">Тренировка</button><button data-t="s">Статистика</button><button data-t="e">Упражнения</button></nav>
+<script>
+const KEY='gymlog_v1';
+const DEF=['Вертикальная тяга (Тренажёр)','Горизонтальная тяга блока V-образной рукоятью','Бабочка (Тренажёр)','Махи в стороны (Гантели)','Обратная разводка одной рукой (Блок)','Сгибание рук на бицепс (Гантель)','Сгибание рук «молот» (Гантели)','Разгибание одной руки на трицепс (Блок)','Разгибание рук на трицепс с прямой рукоятью (Блок)'];
+let S,tab='c',selEx=null,metric='maxW';
+function load(){try{const j=localStorage.getItem(KEY);if(j)return JSON.parse(j)}catch(e){}return{ex:DEF.map((n,i)=>({id:'e'+i,name:n})),workouts:[],draft:null}}
+function save(){try{localStorage.setItem(KEY,JSON.stringify(S))}catch(e){}}
+const GR=['Грудь','Спина','Плечи','Бицепс','Трицепс','Ноги','Ягодицы','Пресс'];
+const DBS={'Грудь':'Жим штанги лёжа|Жим гантелей лёжа|Жим штанги на наклонной скамье|Жим гантелей на наклонной скамье|Жим штанги на скамье с отрицательным наклоном|Жим в тренажёре на грудь|Бабочка (Тренажёр)|Сведение рук в кроссовере (Блок)|Разводка гантелей лёжа|Разводка гантелей на наклонной скамье|Отжимания|Отжимания с широкой постановкой рук','Спина':'Вертикальная тяга (Тренажёр)|Горизонтальная тяга блока V-образной рукоятью|Подтягивания|Подтягивания обратным хватом|Тяга штанги в наклоне|Тяга гантели одной рукой|Тяга Т-грифа|Тяга верхнего блока к груди|Тяга верхнего блока узким хватом|Рычажная тяга (Тренажёр)|Гиперэкстензия|Становая тяга|Пуловер на блоке|Шраги с гантелями|Шраги со штангой','Плечи':'Жим штанги стоя|Жим гантелей сидя|Жим Арнольда|Жим в тренажёре на плечи|Махи в стороны (Гантели)|Махи в стороны (Блок)|Махи гантелей перед собой|Обратная разводка одной рукой (Блок)|Обратная разводка в тренажёре|Обратная разводка гантелей в наклоне|Тяга штанги к подбородку|Лицевая тяга (Блок)','Бицепс':'Сгибание рук на бицепс (Гантель)|Сгибание рук «молот» (Гантели)|Подъём штанги на бицепс|Подъём гантелей на бицепс на наклонной скамье|Сгибание рук на скамье Скотта|Концентрированное сгибание рук|Сгибание рук на бицепс (Блок)|Сгибание рук в тренажёре|Сгибание рук обратным хватом','Трицепс':'Разгибание одной руки на трицепс (Блок)|Разгибание рук на трицепс с прямой рукоятью (Блок)|Разгибание рук с канатной рукоятью (Блок)|Французский жим лёжа|Жим штанги узким хватом|Отжимания на брусьях|Разгибание руки с гантелью из-за головы|Обратные отжимания от скамьи','Ноги':'Приседания со штангой|Приседания в тренажёре Смита|Гакк-приседания|Жим ногами (Тренажёр)|Разгибание ног (Тренажёр)|Сгибание ног лёжа (Тренажёр)|Выпады с гантелями|Болгарские сплит-приседания|Румынская тяга|Подъём на носки стоя|Подъём на носки сидя','Ягодицы':'Ягодичный мостик|Ягодичный мостик со штангой|Отведение ноги назад (Блок)|Отведение ноги в сторону (Блок)|Разведение ног сидя (Тренажёр)','Пресс':'Скручивания|Скручивания на блоке|Боковые скручивания|Подъём ног в висе|Подъём ног лёжа|Планка|Велосипед|Складка|Колесо для пресса'};
+const TECH={'Грудь':['Лягте, лопатки сведены, стопы на полу. Опускайте штангу к середине груди, локти под ~45° к корпусу, затем выжимайте вверх. Таз и лопатки не отрывайте.','Гантели над грудью, опускайте до растяжения груди, предплечья вертикально. Выжимайте по лёгкой дуге, сводя гантели вверху.','Скамья под 30°. Опускайте штангу к верху груди, локти не разводите широко. Выжимайте вверх без прогиба поясницы.','Скамья под 30°. Опускайте гантели до растяжения верха груди, выжимайте вверх, не отрывая лопатки от скамьи.','Скамья с небольшим наклоном головой вниз, нужна страховка. Опускайте штангу к нижней части груди, выжимайте вверх под контролем.','Подстройте сиденье: рукояти на уровне середины груди. Выжимайте вперёд, не отрывая спину от спинки, возвращайте медленно.','Спина прижата, рукояти на уровне груди, локти слегка согнуты. Сводите руки перед собой, на секунду задержитесь и медленно разводите.','Шаг вперёд, корпус чуть наклонён. Сводите руки перед грудью по дуге, локти слегка согнуты, на пике сожмите грудь.','Лёжа, гантели над грудью, локти слегка согнуты. Разводите в стороны до растяжения груди и возвращайте по той же дуге.','Скамья под 30°. Разводите гантели по дуге до растяжения верха груди, локти слегка согнуты, вернитесь без удара гантелей.','Упор лёжа, тело прямое. Опускайтесь, пока грудь почти не коснётся пола, локти под ~45°, выжимайтесь, не прогибая поясницу.','Руки шире плеч, тело прямое. Опускайтесь до груди у пола и поднимайтесь, не проваливая таз. Нагрузка больше на грудь.'],'Спина':['Сядьте, зафиксируйте бёдра. Тяните рукояти к верху груди, сводя лопатки, локти вниз. Не раскачивайтесь, возвращайте медленно.','Сидя, спина ровная, стопы упёрты. Тяните рукоять к животу, сводя лопатки, на пике задержка. Не заваливайте корпус назад.','Хват чуть шире плеч. Подтянитесь до подбородка над перекладиной, ведя локти вниз. Опускайтесь полностью, без раскачки.','Хват снизу на ширине плеч. Подтягивайтесь, ведя локти к корпусу: нагрузка на спину и бицепс. Опускайтесь до выпрямленных рук.','Наклон корпуса почти до параллели, спина ровная, колени согнуты. Тяните штангу к низу живота, локти назад, лопатки сведены.','Упор рукой и коленом в скамью, спина ровная. Тяните гантель к поясу, локоть вдоль корпуса, без вращения корпуса.','Наклон вперёд, спина ровная. Тяните рукоять к груди, сводя лопатки, не помогая рывком корпуса.','Хват шире плеч, лёгкий наклон назад. Тяните гриф к верху груди, лопатки вниз и вместе. Не тяните за голову.','Узкая рукоять, корпус чуть назад. Тяните к груди, локти прижаты, чувствуйте работу широчайших, возврат медленный.','Грудь на опоре, спина ровная. Тяните рукояти к корпусу, сводя лопатки, на пике задержитесь. Плечи не поднимайте.','Бёдра на опоре, корпус вниз с ровной спиной. Поднимайтесь до прямой линии с ногами, без переразгибания поясницы.','Штанга у голеней, спина ровная, лопатки сведены. Вставайте, толкая пол ногами, штанга близко к телу. Не округляйте поясницу.','Стоя у блока, руки почти прямые. Тяните рукоять дугой к бёдрам, чувствуя широчайшие, возвращайте медленно.','Гантели по бокам, спина ровная. Поднимайте плечи вверх к ушам, на пике задержка, без вращения плеч и без рывка.','Штанга в опущенных руках. Поднимайте плечи вверх, на пике сожмите трапеции, опускайте медленно. Руки не сгибайте.'],'Плечи':['Хват чуть шире плеч, штанга на верху груди. Выжимайте вверх над головой, голову слегка подайте вперёд. Поясницу не прогибайте.','Сидя, спина прижата. Выжимайте гантели вверх до выпрямления рук, опускайте до уровня ушей, локти не уводите далеко назад.','Начните с гантелей перед грудью ладонями к себе, выжимая, разворачивайте ладони вперёд. Опускайте с обратным разворотом.','Сиденье по росту, рукояти на уровне плеч. Выжимайте вверх без рывка, не отрывайте спину от спинки.','Гантели по бокам, локти слегка согнуты. Поднимайте в стороны до уровня плеч, мизинец чуть выше большого, без раскачки.','Стоя боком к блоку. Поднимайте руку в сторону до уровня плеч, локоть чуть согнут, опускайте медленно.','Гантели перед бёдрами. Поднимайте перед собой до уровня плеч, не раскачивая корпус, опускайте под контролем.','Стойка боком к блоку, рукоять в дальней руке. Разводите руку назад-в сторону на уровне плеч, нагружая заднюю дельту.','Грудью к спинке тренажёра, рукояти на уровне плеч. Разводите руки назад, локти чуть согнуты, лопатки не сводите резко.','Наклон корпуса почти параллельно полу, спина ровная. Разводите гантели в стороны до линии плеч, локти слегка согнуты.','Узкий хват, штанга вдоль тела. Тяните до груди, локти выше кистей, плечи не поднимайте к ушам.','Канат на уровне лица. Тяните к лицу, разводя руки в стороны, локти высоко, на пике сведите лопатки.'],'Бицепс':['Стоя, гантели по бокам, локти прижаты. Сгибайте руку, слегка супинируя кисть, на пике сожмите бицепс, опускайте медленно.','Ладони смотрят друг на друга. Сгибайте руки без вращения кисти, локти прижаты: нагружается и плечевая мышца.','Хват на ширине плеч, локти у корпуса. Поднимайте штангу без раскачки корпуса, опускайте полностью под контролем.','Скамья под 45°, руки свободно висят. Сгибайте руки, не выводя локти вперёд, получая растяжение бицепса.','Плечи на наклонной подушке, руки не отрываются. Сгибайте до сокращения, опускайте почти до полного разгибания.','Сидя, локоть упирается во внутреннюю часть бедра. Сгибайте руку с гантелью к плечу, на пике сожмите, опускайте медленно.','Стоя лицом к блоку, локти прижаты. Сгибайте руки к плечам, корпус не раскачивайте.','Подгоните сиденье, локти на подушке. Сгибайте рукояти к плечам, возвращайте не до полного расслабления.','Хват сверху, локти прижаты. Сгибайте руки, нагружая плечелучевую мышцу и предплечья, без раскачки.'],'Трицепс':['Стоя у блока, локоть прижат к корпусу. Разгибайте руку вниз до выпрямления, на пике сожмите трицепс, возвращайте медленно.','Прямая рукоять, локти прижаты к бокам. Разгибайте руки вниз до конца, плечи неподвижны, возврат медленный.','Канатная рукоять, локти у корпуса. Разгибайте вниз, в конце разведите концы каната в стороны для сокращения.','Лёжа, штанга над головой. Сгибайте только локти, опуская гриф ко лбу, затем разгибайте вверх. Локти не разводите.','Хват чуть уже плеч, локти у корпуса. Опускайте штангу к низу груди и выжимайте вверх, нагружая трицепс.','Упор на брусьях, корпус вертикально, локти назад. Опускайтесь до угла 90° в локтях и выжимайтесь вверх.','Гантель двумя руками над головой, локти направлены вверх. Опускайте за голову и разгибайте руки, локти не разводите.','Упор руками сзади на скамье, ноги вперёд. Опускайтесь, сгибая локти до 90°, и выжимайтесь, держа спину близко к скамье.'],'Ноги':['Штанга на трапециях, стопы на ширине плеч. Приседайте с ровной спиной до параллели бёдер и пола, колени по линии носков, вставайте.','Стопы слегка вперёд от грифа. Приседайте до параллели, спина прижата, поднимайтесь без отрыва пяток.','Плечи под подушками, стопы на платформе. Приседайте глубоко, спину прижимая к спинке, поднимайтесь без блокировки коленей.','Стопы на ширине плеч, поясница прижата. Опускайте платформу до угла ~90° в коленях, выжимайте, колени не блокируйте.','Сядьте, зафиксируйте бёдра. Разгибайте ноги до выпрямления, пауза вверху, медленно опускайте.','Лёжа, валик над пятками. Сгибайте ноги к ягодицам, таз не отрывайте, опускайте медленно.','Шагните вперёд, опуститесь до угла 90° в обоих коленях, колено не выходит за носок. Оттолкнитесь передней ногой назад.','Задняя нога на скамье. Приседайте на передней ноге, корпус чуть наклонён, колено по линии носка, вставайте.','Лёгкий сгиб в коленях, штанга у ног. Отводите таз назад с ровной спиной до растяжения задней поверхности бедра и вернитесь.','Стоя на возвышении носками, пятки свисают. Поднимайтесь на носки максимально, на пике задержка, опускайтесь до растяжения.','Сидя, колени под подушкой. Поднимайте пятки максимально, пауза вверху, опускайтесь медленно до растяжения.'],'Ягодицы':['Лёжа, лопатки на скамье или полу, стопы на ширине плеч. Поднимайте таз до прямой линии, сожмите ягодицы, опускайте медленно.','Лопатки на скамье, штанга на тазу. Поднимайте таз до линии корпуса и бёдер, ягодицы сжаты, поясницу не прогибайте.','Манжета на щиколотке. Отводите прямую ногу назад, ягодицу сжимайте на пике, корпус не раскачивайте.','Стоя боком к блоку, отводите ногу в сторону, корпус неподвижен. Возвращайте под контролем.','Сидя, спина прижата. Разводите бёдра в стороны, на пике пауза, возвращайте медленно.'],'Пресс':['Лёжа, ноги согнуты. Скручивайте корпус, отрывая лопатки, поясницу прижимайте. Шею не тяните руками.','На коленях у блока, канат у головы. Скручивайте корпус вниз, округляя спину, без движения бёдер.','Скручивайте корпус в сторону к противоположному колену, контролируйте, без рывков.','Вис на перекладине. Поднимайте ноги до уровня таза или выше, слегка подкручивая таз, не раскачивайтесь.','Лёжа на спине, поясница прижата. Поднимайте прямые ноги до вертикали, опускайте, не касаясь пола.','Упор на предплечьях, тело прямое. Держите, напрягая пресс и ягодицы, таз не прогибайте и не поднимайте.','Лёжа, поочерёдно сводите локоть и противоположное колено, поясница прижата, без рывков.','Лёжа, одновременно поднимайте корпус и ноги, касаясь руками стоп, слегка согнув колени.','На коленях катите колесо вперёд с напряжённым прессом до линии корпуса, возвращайтесь, не прогибая поясницу.']};
+const DBL=[];GR.forEach(g=>DBS[g].split('|').forEach((n,i)=>DBL.push([n,g,TECH[g][i]])));
+function body(g){const base=cx=>`<circle cx='${cx}' cy='16' r='11'/><rect x='${cx-18}' y='30' width='36' height='62' rx='10'/><rect x='${cx-30}' y='32' width='10' height='56' rx='5'/><rect x='${cx+20}' y='32' width='10' height='56' rx='5'/><rect x='${cx-17}' y='94' width='15' height='80' rx='7'/><rect x='${cx+2}' y='94' width='15' height='80' rx='7'/>`;
+ const z=(cx,bk)=>{const R=(x,y,w,h,r)=>`<rect x='${cx+x}' y='${y}' width='${w}' height='${h}' rx='${r}'/>`,E=(x,y,a,b)=>`<ellipse cx='${cx+x}' cy='${y}' rx='${a}' ry='${b}'/>`,M=bk?{'Спина':R(-17,34,34,40,8),'Плечи':E(-25,37,7,8)+E(25,37,7,8),'Трицепс':R(-30,46,10,24,5)+R(20,46,10,24,5),'Ягодицы':R(-17,88,34,16,8),'Ноги':R(-17,106,15,46,7)+R(2,106,15,46,7)}:{'Грудь':R(-16,36,32,16,6),'Плечи':E(-25,37,7,8)+E(25,37,7,8),'Бицепс':R(-30,46,10,22,5)+R(20,46,10,22,5),'Пресс':R(-9,56,18,30,5),'Ноги':R(-17,96,15,50,7)+R(2,96,15,50,7)};return M[g]||''};
+ return `<svg viewBox='0 0 200 196' width='100%' style='max-height:210px'><g fill='var(--bd)'>${base(50)}${base(150)}</g><g fill='var(--hl)'>${z(50,0)}${z(150,1)}</g><text x='50' y='192' text-anchor='middle'>Спереди</text><text x='150' y='192' text-anchor='middle'>Сзади</text></svg>`}
+function showInfo(n,g,t){const m=document.createElement('div');m.className='md';m.innerHTML=`<div class='mb'><h3 style='color:var(--tx)'>${esc(n)}</h3><div class='mu'>Группа мышц: ${esc(g)}</div>${body(g)}<p><b>Техника</b><br>${t?esc(t):'Описание для этого упражнения пока не добавлено.'}</p><a class='b g' style='display:block;text-align:center;text-decoration:none' target='_blank' rel='noopener' href='https://www.youtube.com/results?search_query=${encodeURIComponent(n+' техника выполнения')}'>Найти видео с техникой</a><button class='b full' id='infc'>Закрыть</button></div>`;document.body.appendChild(m);document.getElementById('infc').onclick=()=>m.remove()}
+const RULES=[[/обратн\S* (разводк|разведен)|к подбородку|махи|дельт|плеч|армейск|жим.*(сидя|стоя)|арнольд/,'Плечи'],[/трицепс|французск|брусь|разгибани[ея] рук/,'Трицепс'],[/бицепс|молот|сгибани[ея] рук|скотт|концентр/,'Бицепс'],[/ягодич|мост|отведени/,'Ягодицы'],[/пресс|скручив|планк|подъ[её]м ног|складк|велосипед/,'Пресс'],[/присед|жим ног|выпад|ног|икр|носк|румынск|гакк/,'Ноги'],[/тяга|подтягив|гиперэкст|пуловер|спин|шраг/,'Спина'],[/груд|жим|бабочк|кроссовер|разводк|отжиман|пек|сведени/,'Грудь']];
+function grp(n){const l=n.toLowerCase().trim(),f=DBL.find(x=>x[0].toLowerCase()===l);if(f)return f[1];const r=RULES.find(q=>q[0].test(l));return r?r[1]:'Другое'}
+const gOf=e=>e.g||grp(e.name);
+let per='m',act='vol',qText='',qg='Все';
+S=load();S.ex.forEach(e=>{if(!e.g)e.g=grp(e.name)});
+const $=s=>document.querySelector(s),app=$('#app');
+const esc=s=>String(s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const num=v=>parseFloat(String(v).replace(',','.'))||0;
+const fd=d=>{const t=new Date(d);return String(t.getDate()).padStart(2,'0')+'.'+String(t.getMonth()+1).padStart(2,'0')};
+const fmt=n=>Math.round(n*10)/10;
+const valid=s=>s.map(x=>({...x,x:(x.x||[]).filter(q=>num(q.w)>0||num(q.r)>0)})).filter(x=>num(x.w)>0||num(x.r)>0||x.x.length);
+const pt=s=>[{w:s.w,r:s.r},...(s.x||[])].filter(q=>num(q.w)>0||num(q.r)>0);
+const ss=s=>pt(s).map(q=>fmt(num(q.w))+'×'+num(q.r)).join(' → ');
+function hist(id){return S.workouts.filter(w=>w.sets[id]&&valid(w.sets[id]).length).sort((a,b)=>a.date-b.date).map(w=>({id:w.id,d:w.date,s:valid(w.sets[id])}))}
+function met(s){s=s.flatMap(pt);return{maxW:Math.max(...s.map(x=>num(x.w))),reps:s.reduce((a,x)=>a+num(x.r),0),vol:s.reduce((a,x)=>a+num(x.w)*num(x.r),0),e1:Math.max(...s.map(x=>num(x.w)*(1+num(x.r)/30)))}}
+const MN={maxW:'Макс. вес, кг',reps:'Сумма повторов',vol:'Объём, кг×повт',e1:'Расчётный 1ПМ, кг'};
+
+function render(){
+ document.querySelectorAll('nav button').forEach(b=>b.classList.toggle('on',b.dataset.t===tab));
+ app.innerHTML=tab==='c'?vC():tab==='w'?vW():tab==='s'?vS():vE();if(tab==='s'&&document.getElementById('ch'))setCh(CH.v.length-1);
+ window.scrollTo(0,0);
+}
+function vW(){
+ if(!S.draft)return `<h2>Тренировка</h2><div class="card"><p class="mu">Всего тренировок: ${S.workouts.length}. Начни новую — вес и повторы подставятся подсказкой из прошлого раза.</p><button class="b full" data-a="start">Начать тренировку</button></div>`+histList();
+ let h=`<h2>Тренировка ${fd(S.draft.date)}${S.draft.editId?' (изменение)':''}</h2><input type="date" id="wd" value="${(d=>d.getFullYear()+'-'+String(d.getMonth()+1).padStart(2,'0')+'-'+String(d.getDate()).padStart(2,'0'))(new Date(S.draft.date))}" style="margin-bottom:12px">`;
+ S.ex.forEach(e=>{
+  const hs=hist(e.id),last=hs.length?hs[hs.length-1].s:[];
+  const sets=S.draft.sets[e.id]||(S.draft.sets[e.id]=[{w:'',r:''}]);
+  h+=`<div class="card"><h3>${esc(e.name)}</h3><div class="mu">${last.length?'Прошлый раз: '+last.map(ss).join(', '):'Пока нет данных'}</div>
+  <div class="row mu"><span>№</span><span>Вес, кг</span><span>Повторы</span><span></span></div>`;
+  sets.forEach((s,i)=>{const p=last[i]||last[last.length-1]||{};
+   h+=`<div class="row"><span class="mu">${i+1}</span><input inputmode="decimal" placeholder="${p.w||'кг'}" value="${esc(s.w)}" data-ex="${e.id}" data-i="${i}" data-f="w"><input inputmode="numeric" placeholder="${p.r||'повт.'}" value="${esc(s.r)}" data-ex="${e.id}" data-i="${i}" data-f="r"><button class="x" data-a="delset" data-ex="${e.id}" data-i="${i}">×</button></div>`+(s.x||[]).map((q,j)=>`<div class="row" style="padding-left:14px"><span class="mu">↳</span><input inputmode="decimal" placeholder="${((p.x||[])[j]||{}).w||'кг'}" value="${esc(q.w)}" data-ex="${e.id}" data-i="${i}" data-j="${j}" data-f="w"><input inputmode="numeric" placeholder="${((p.x||[])[j]||{}).r||'повт.'}" value="${esc(q.r)}" data-ex="${e.id}" data-i="${i}" data-j="${j}" data-f="r"><button class="x" data-a="deldrop" data-ex="${e.id}" data-i="${i}" data-j="${j}">×</button></div>`).join('')+`<button class="b g" style="padding:6px 10px;font-size:13px;margin:6px 0 0 36px" data-a="adddrop" data-ex="${e.id}" data-i="${i}">+ Снизить вес</button>`});
+  h+=`<button class="b g full" data-a="addset" data-ex="${e.id}">+ Подход</button></div>`});
+ return h+`<button class="b full" data-a="finish">Завершить и сохранить</button><button class="b g full" data-a="cancel">Отменить тренировку</button>`;
+}
+function histList(){if(!S.workouts.length)return '';const nm=id=>(S.ex.find(e=>e.id===id)||{name:'Удалённое упражнение'}).name;return '<h2>История</h2>'+S.workouts.slice().sort((a,b)=>b.date-a.date).map(w=>`<div class="card"><div style="display:flex;justify-content:space-between;align-items:center"><b>${new Date(w.date).toLocaleDateString('ru')}</b><button class="x" style="font-size:14px" data-a="delw" data-w="${w.id}">Удалить тренировку</button></div>`+Object.keys(w.sets).map(k=>`<div class="mu">${esc(nm(k))}: ${w.sets[k].map(ss).join(', ')}</div>`).join('')+'</div>').join('')}
+function vE(){
+ return `<h2>Упражнения</h2>${catalog()}<h3 style="margin:16px 0 8px">Мои упражнения</h3><div class="card"><div style="display:flex;gap:8px"><input id="newex" placeholder="Новое упражнение"><button class="b" data-a="addex">Добавить</button></div>`+
+ S.ex.map(e=>`<div class="ex" style="flex-wrap:wrap"><span style="flex:1 1 100%">${esc(e.name)}</span><select class="gs" data-ex="${e.id}" style="flex:1">${GR.concat('Другое').map(g=>`<option ${g===gOf(e)?'selected':''}>${g}</option>`).join('')}</select><button class="b g" data-a="infoex" data-ex="${e.id}">Техника</button><button class="b g" data-a="ren" data-ex="${e.id}">Изменить</button><button class="x" data-a="delex" data-ex="${e.id}">×</button></div>`).join('')+`</div><p class="mu">История удалённого упражнения остаётся в сохранённых тренировках.</p>
+ <div class="card"><h3>Резервная копия</h3><div class="mu">Сохрани историю в файл или скопируй, чтобы перенести на другой телефон или после смены ссылки.</div>
+ <button class="b full" data-a="exp">Сохранить в файл</button>
+ <button class="b g full" data-a="cpy">Скопировать данные</button>
+ <label class="b g full" style="display:block;text-align:center;cursor:pointer">Загрузить из файла<input type="file" id="imp" accept=".json,application/json,text/plain" hidden></label>
+ <button class="b g full" data-a="pst">Вставить скопированные данные</button></div>`;
+}
+const PER=[['w','Неделя',7],['m','Месяц',30],['q','3 мес.',90],['h','6 мес.',180],['y','Год',365],['a','Всё',0]];
+const inT=t=>{const p=PER.find(q=>q[0]===per);return !p[2]||t>=Date.now()-p[2]*864e5};
+function buckets(){const D=864e5,now=new Date(),sd=new Date(now.getFullYear(),now.getMonth(),now.getDate()).getTime(),p=PER.find(q=>q[0]===per),B=[];
+ if(per==='w'){for(let i=6;i>=0;i--){const a=sd-i*D;B.push({a,b:a+D,l:fd(a)})}}
+ else if(per==='m'||per==='q'){const n=Math.ceil(p[2]/7);for(let i=n-1;i>=0;i--){const b=sd+D-i*7*D,a=b-7*D;B.push({a,b,l:fd(a)})}}
+ else{const f=new Date(Math.min(...S.workouts.map(w=>w.date),Date.now())),n=per==='h'?6:per==='y'?12:Math.min(36,(now.getFullYear()-f.getFullYear())*12+now.getMonth()-f.getMonth()+1);for(let i=n-1;i>=0;i--){const a=new Date(now.getFullYear(),now.getMonth()-i,1).getTime(),b=new Date(now.getFullYear(),now.getMonth()-i+1,1).getTime();B.push({a,b,l:new Date(a).toLocaleDateString('ru',{month:'short'})})}}
+ return B}
+function gStats(){const m={},gm={};GR.forEach(g=>m[g]=0);S.ex.forEach(e=>gm[e.id]=gOf(e));S.workouts.filter(w=>inT(w.date)).forEach(w=>{for(const k in w.sets){const g=gm[k];if(g&&m[g]!==undefined)m[g]+=w.sets[k].length}});return m}
+function radar(m,mx){const n=GR.length,px=(i,k)=>{const a=-Math.PI/2+2*Math.PI*i/n;return [150+85*k*Math.cos(a),125+85*k*Math.sin(a)].map(v=>Math.round(v*10)/10)};
+ return `<svg viewBox='0 0 300 250' width='100%'>`+[.33,.66,1].map(k=>`<polygon points='${GR.map((g,i)=>px(i,k).join(',')).join(' ')}' fill='none' stroke='var(--bd)'/>`).join('')+`<polygon points='${GR.map((g,i)=>px(i,Math.max(.04,m[g]/mx)).join(',')).join(' ')}' fill='rgba(232,85,47,.28)' stroke='var(--hl)' stroke-width='2' stroke-linejoin='round'/>`+GR.map((g,i)=>{const [x,y]=px(i,1.27);return `<text x='${x}' y='${y+3}' text-anchor='middle'>${g}</text>`}).join('')+'</svg>'}
+function resList(){const t=qText.trim().toLowerCase(),have=new Set(S.ex.map(e=>e.name.toLowerCase()));const L=DBL.map((x,k)=>[x,k]).filter(([x])=>(qg==='Все'||x[1]===qg)&&(!t||x[0].toLowerCase().includes(t))).slice(0,40);
+ return L.length?L.map(([x,k])=>`<div class='ex'><span>${esc(x[0])}<br><span class='mu'>${x[1]}</span></span><button class='b g' data-a='info' data-k='${k}' style='padding:8px 10px;font-size:13px'>Техника</button>${have.has(x[0].toLowerCase())?`<span class='mu' style='flex:none'>добавлено</span>`:`<button class='b g' data-a='addcat' data-k='${k}'>+</button>`}</div>`).join(''):`<p class='mu'>Ничего не найдено. Добавь своё ниже.</p>`}
+function catalog(){return `<div class='card'><h3>Каталог упражнений</h3><input id='q' placeholder='Поиск упражнения' value='${esc(qText)}' style='margin-top:8px'><div class='chips'>`+['Все',...GR].map(g=>`<button class='${g===qg?'on':''}' data-a='qg' data-g='${g}'>${g}</button>`).join('')+`</div><div id='res'>${resList()}</div></div>`}
+function vS(){
+ const p=PER.find(q=>q[0]===per),cur=S.workouts.filter(w=>inT(w.date));
+ const val=w=>act==='cnt'?1:Object.values(w.sets).reduce((a,s)=>a+s.flatMap(pt).reduce((b,q)=>b+num(q.w)*num(q.r),0),0);
+ const tot=cur.reduce((a,w)=>a+val(w),0);let dl='';
+ if(p[2]){const now=Date.now(),D=864e5,pv=S.workouts.filter(w=>w.date<now-p[2]*D&&w.date>=now-2*p[2]*D).reduce((a,w)=>a+val(w),0),d=tot-pv;dl=`<span class='${d>0?'up':d<0?'dn':'mu'}'>${d>0?'↗ +':d<0?'↘ ':''}${Math.round(d).toLocaleString('ru')}</span>`}
+ const B=buckets().map(b=>({l:b.l,v:S.workouts.filter(w=>w.date>=b.a&&w.date<b.b).reduce((a,w)=>a+val(w),0)})),mx=Math.max(1,...B.map(b=>b.v)),W=340,H=150,bw=(W-10)/B.length,st=Math.ceil(B.length/6);
+ const bars=`<svg viewBox='0 0 ${W} ${H+22}' width='100%'>`+B.map((b,i)=>{const h=Math.max(b.v?4:1,b.v/mx*(H-10)),x=5+i*bw;return `<rect x='${x+bw*.15}' y='${H-h}' width='${bw*.7}' height='${h}' rx='3' fill='${b.v?'var(--hl)':'var(--bd)'}'/>`+(i%st===0?`<text x='${x+bw/2}' y='${H+14}' text-anchor='middle'>${b.l}</text>`:'')}).join('')+'</svg>';
+ const m=gStats(),sum=GR.reduce((a,g)=>a+m[g],0),gmx=Math.max(1,...GR.map(g=>m[g])),weak=GR.reduce((a,g)=>m[g]<m[a]?g:a,GR[0]);
+ return `<h2>Статистика</h2><div class='chips'>${PER.map(q=>`<button class='${q[0]===per?'on':''}' data-a='per' data-p='${q[0]}'>${q[1]}</button>`).join('')}</div>`+
+ `<div class='card'><div style='display:flex;justify-content:space-between;align-items:baseline'><b style='font-size:26px'>${Math.round(tot).toLocaleString('ru')}${act==='vol'?' кг':''}</b>${dl}</div><div class='mu'>${act==='vol'?'Общий объём':'Тренировок'} за период</div>${bars}<div class='chips'><button class='${act==='vol'?'on':''}' data-a='act' data-k='vol'>Объём</button><button class='${act==='cnt'?'on':''}' data-a='act' data-k='cnt'>Тренировки</button></div></div>`+
+ `<div class='card'><h3>Группы мышц</h3><div class='mu'>Нагрузка по числу подходов</div>${radar(m,gmx)}${sum?`<div class='mu'>Меньше всего нагрузки: <b style='color:var(--tx)'>${weak}</b></div>`:`<div class='mu'>Нет данных за период</div>`}`+GR.map(g=>`<div style='margin-top:10px'><div style='display:flex;justify-content:space-between'><span>${g}</span><span class='mu'>${m[g]} подх.</span></div><div class='gb'><i style='width:${m[g]/gmx*100}%'></i></div></div>`).join('')+`</div><h2 style='font-size:20px;margin-top:20px'>По упражнению</h2>`+vSx();
+}
+function vSx(){
+ if(!S.ex.length)return '<h2>Статистика</h2><p class="mu">Нет упражнений</p>';
+ if(!selEx||!S.ex.find(e=>e.id===selEx))selEx=S.ex[0].id;
+ const hs=hist(selEx).filter(x=>inT(x.d));
+ let h=`<select id="selex">${S.ex.map(e=>`<option value="${e.id}" ${e.id===selEx?'selected':''}>${esc(e.name)}</option>`).join('')}</select>`;
+ if(!hs.length)return h+'<div class="card mu" style="margin-top:12px">По этому упражнению пока нет записанных тренировок.</div>';
+ const M=hs.map(x=>met(x.s)),L=M[M.length-1],F=M[0],P=M.length>1?M[M.length-2]:null;
+ const dl=(a,b)=>{const d=fmt(a-b);return `<span class="${d>0?'up':d<0?'dn':'mu'}">${d>0?'+':''}${d}</span>`};
+ h+=`<div class="grid" style="margin-top:12px">
+ <div class="st"><span class="mu">Тренировок</span><b>${hs.length}</b></div>
+ <div class="st"><span class="mu">Рекорд веса</span><b>${fmt(Math.max(...M.map(m=>m.maxW)))} кг</b></div>
+ <div class="st"><span class="mu">Макс. вес сейчас</span><b>${fmt(L.maxW)} кг</b>${P?'к прошлой: '+dl(L.maxW,P.maxW):''}<br>с начала: ${dl(L.maxW,F.maxW)}</div>
+ <div class="st"><span class="mu">Повторы (сумма)</span><b>${L.reps}</b>${P?'к прошлой: '+dl(L.reps,P.reps):''}<br>с начала: ${dl(L.reps,F.reps)}</div>
+ <div class="st"><span class="mu">Объём</span><b>${fmt(L.vol)}</b>${P?'к прошлой: '+dl(L.vol,P.vol):''}<br>с начала: ${dl(L.vol,F.vol)}</div>
+ <div class="st"><span class="mu">Расчётный 1ПМ</span><b>${fmt(L.e1)} кг</b>с начала: ${dl(L.e1,F.e1)}</div></div>
+ <div class="chips">${Object.keys(MN).map(k=>`<button class="${k===metric?'on':''}" data-a="met" data-m="${k}">${MN[k]}</button>`).join('')}</div>
+ <div class="card">${chart(hs,M)}<div class="mu">Каждая точка — одна тренировка</div></div>
+ <div class="card"><table><tr><th>Дата</th><th>Подходы (кг×повт)</th><th>Объём</th><th></th></tr>${hs.slice().reverse().map((x,i)=>`<tr><td>${new Date(x.d).toLocaleDateString('ru')}</td><td>${x.s.map(ss).join(', ')}</td><td>${fmt(M[M.length-1-i].vol)}</td><td><button class="x" style="font-size:16px" data-a="delrec" data-w="${x.id}" data-ex="${selEx}">×</button></td></tr>`).join('')}</table></div>`;
+ return h;
+}
+const dk=t=>{const d=new Date(t);return d.getFullYear()+'-'+(d.getMonth()+1)+'-'+d.getDate()};
+let cal=new Date(),calSel=dk(Date.now()),CH=null;
+const MON=['Январь','Февраль','Март','Апрель','Май','Июнь','Июль','Август','Сентябрь','Октябрь','Ноябрь','Декабрь'];
+function vC(){
+ const y=cal.getFullYear(),m=cal.getMonth(),first=(new Date(y,m,1).getDay()+6)%7,n=new Date(y,m+1,0).getDate(),today=dk(Date.now()),done={};
+ S.workouts.forEach(w=>{done[dk(w.date)]=1});
+ let h=`<div style="display:flex;justify-content:space-between;align-items:center"><h2>${MON[m]} ${y}</h2><div><button class="b g" data-a="cprev">‹</button> <button class="b g" data-a="cnext">›</button></div></div><div class="card"><div class="cal">`+['Пн','Вт','Ср','Чт','Пт','Сб','Вс'].map(d=>`<i class="wd">${d}</i>`).join('')+'<i></i>'.repeat(first);
+ for(let d=1;d<=n;d++){const k=y+'-'+(m+1)+'-'+d;h+=`<button class="day${done[k]?' d':''}${k===today?' t':''}${k===calSel?' s':''}" data-a="cday" data-k="${k}">${d}</button>`}
+ h+='</div></div>'+(S.draft?'<button class="b full" data-a="goW">Продолжить тренировку</button>':'<button class="b full" data-a="start">'+(calSel===today?'Начать тренировку':'Добавить тренировку на '+(q=>q[2].padStart(2,'0')+'.'+q[1].padStart(2,'0'))(calSel.split('-')))+'</button>');
+ const nm=id=>(S.ex.find(e=>e.id===id)||{name:'Удалённое упражнение'}).name,ws=S.workouts.filter(w=>dk(w.date)===calSel);
+ h+='<div style="height:12px"></div>'+(ws.length?ws.map(w=>`<div class="card"><div style="display:flex;justify-content:space-between;align-items:center"><b>${new Date(w.date).toLocaleDateString('ru')}</b><button class="x" style="font-size:14px;color:var(--tx)" data-a="editw" data-w="${w.id}">Изменить</button><button class="x" style="font-size:14px" data-a="delw" data-w="${w.id}">Удалить тренировку</button></div>`+Object.keys(w.sets).map(k=>`<div style="margin-top:8px"><b style="font-size:14px">${esc(nm(k))}</b><div class="mu">${w.sets[k].map(ss).join(', ')}</div></div>`).join('')+'</div>').join(''):'<div class="card mu">В этот день тренировок нет</div>');
+ return h;
+}
+function setCh(i){
+ const [x,y]=CH.P[i],t=fmt(CH.v[i])+'  '+new Date(CH.hs[i].d).toLocaleDateString('ru'),w=t.length*6.6+22,rx=Math.min(Math.max(x-w/2,0),CH.W-w),g=id=>document.getElementById(id);
+ g('chl').setAttribute('x1',x);g('chl').setAttribute('x2',x);g('chd').setAttribute('cx',x);g('chd').setAttribute('cy',y);
+ g('chr').setAttribute('x',rx);g('chr').setAttribute('y',4);g('chr').setAttribute('width',w);g('chx').setAttribute('x',rx+w/2);g('chx').setAttribute('y',20);g('chx').textContent=t;
+}
+function chPick(e){const s=document.getElementById('ch');if(!s||!CH||!s.contains(e.target))return;const r=s.getBoundingClientRect(),x=(e.clientX-r.left)/r.width*CH.W;let bi=0,bd=1e9;CH.P.forEach((p,i)=>{const q=Math.abs(p[0]-x);if(q<bd){bd=q;bi=i}});setCh(bi)}
+['pointerdown','pointermove'].forEach(n=>document.addEventListener(n,chPick));
+function chart(hs,M){
+ const W=340,H=220,l=10,r=10,t=44,b=26,v=M.map(m=>m[metric]);
+ let mn=Math.min(...v),mx=Math.max(...v);if(mn===mx){mn-=1;mx+=1}const pd=(mx-mn)*.2;mn=Math.max(0,mn-pd);mx+=pd;
+ const X=i=>v.length===1?W/2:l+(W-l-r)*i/(v.length-1),Y=y=>t+(H-t-b)*(1-(y-mn)/(mx-mn)),P=v.map((y,i)=>[X(i),Y(y)]);
+ let d='M'+P[0][0]+','+P[0][1];for(let i=0;i<P.length-1;i++){const a=P[i],c=P[i+1],q=(a[0]+c[0])/2;d+=`C${q},${a[1]} ${q},${c[1]} ${c[0]},${c[1]}`}
+ const ar=d+`L${P[P.length-1][0]},${H-b}L${P[0][0]},${H-b}Z`;CH={v,hs,P,W};
+ let s=`<svg id="ch" viewBox="0 0 ${W} ${H}" width="100%" style="touch-action:pan-y"><path d="${ar}" fill="rgba(255,255,255,.07)"/><path d="${d}" fill="none" stroke="var(--tx)" stroke-width="2.2"/><line id="chl" y1="${t-8}" y2="${H-b}" stroke="var(--mu)"/><circle id="chd" r="4.5" fill="var(--tx)"/><rect id="chr" rx="10" height="26" fill="var(--tx)"/><text id="chx" text-anchor="middle" style="fill:var(--bg);font-size:11px;font-weight:700"></text>`;
+ const st=Math.ceil(v.length/6);v.forEach((y,i)=>{if(i%st===0||i===v.length-1)s+=`<text x="${X(i)}" y="${H-8}" text-anchor="middle">${fd(hs[i].d)}</text>`});
+ return s+'</svg>';
+}
+function chartOld(hs,M){
+ const W=340,H=210,l=34,r=14,t=22,b=26,v=M.map(m=>m[metric]);
+ let mn=Math.min(...v),mx=Math.max(...v);if(mn===mx){mn-=1;mx+=1}const pad=(mx-mn)*.15;mn=Math.max(0,mn-pad);mx+=pad;
+ const X=i=>v.length===1?(l+W-r)/2:l+(W-l-r)*i/(v.length-1),Y=y=>t+(H-t-b)*(1-(y-mn)/(mx-mn));
+ let s=`<svg viewBox="0 0 ${W} ${H}" width="100%">`;
+ for(let i=0;i<=3;i++){const y=mn+(mx-mn)*i/3;s+=`<line x1="${l}" x2="${W-r}" y1="${Y(y)}" y2="${Y(y)}" stroke="var(--bd)"/><text x="${l-4}" y="${Y(y)+3}" text-anchor="end">${fmt(y)}</text>`}
+ s+=`<polyline fill="none" stroke="var(--ac)" stroke-width="2.5" points="${v.map((y,i)=>X(i)+','+Y(y)).join(' ')}"/>`;
+ const step=Math.ceil(v.length/6);
+ v.forEach((y,i)=>{s+=`<circle cx="${X(i)}" cy="${Y(y)}" r="4" fill="var(--ac)"/>`;if(v.length<=12)s+=`<text x="${X(i)}" y="${Y(y)-8}" text-anchor="middle" style="fill:var(--tx)">${fmt(y)}</text>`;if(i%step===0||i===v.length-1)s+=`<text x="${X(i)}" y="${H-8}" text-anchor="middle">${fd(hs[i].d)}</text>`});
+ return s+'</svg>';
+}
+function imp(t){try{const d=JSON.parse(t);if(!d||!Array.isArray(d.ex)||!Array.isArray(d.workouts))throw 0;dlg('Заменить текущие данные импортированными? Тренировок в файле: '+d.workouts.length,()=>{S={ex:d.ex,workouts:d.workouts,draft:null};save();render()})}catch(e){dlg('Не удалось прочитать данные',()=>{})}}
+function dlg(text,cb,val){const m=document.createElement('div');m.className='md';m.innerHTML=`<div class="mb"><p>${esc(text)}</p>${val!==undefined?`<input id="dv" value="${esc(val)}">`:''}<div style="display:flex;gap:8px;margin-top:12px"><button class="b g" style="flex:1" id="dn">Отмена</button><button class="b" style="flex:1" id="dok">ОК</button></div></div>`;document.body.appendChild(m);document.getElementById('dn').onclick=()=>m.remove();document.getElementById('dok').onclick=()=>{const v=val!==undefined?document.getElementById('dv').value:true;m.remove();cb(v)}}
+document.addEventListener('input',e=>{const t=e.target;if(t.id==='q'){qText=t.value;document.getElementById('res').innerHTML=resList()}if(t.dataset.f&&S.draft){{const q=S.draft.sets[t.dataset.ex][+t.dataset.i];(t.dataset.j!==undefined?q.x[+t.dataset.j]:q)[t.dataset.f]=t.value}save()}});
+document.addEventListener('change',e=>{if(e.target.id==='selex'){selEx=e.target.value;render()}else if(e.target.classList.contains('gs')){const x=S.ex.find(q=>q.id===e.target.dataset.ex);if(x){x.g=e.target.value;save()}}else if(e.target.id==='wd'){const p=e.target.value.split('-');if(p.length===3&&S.draft){const o=new Date(S.draft.date);S.draft.date=new Date(+p[0],+p[1]-1,+p[2],o.getHours(),o.getMinutes()).getTime();save();render()}}else if(e.target.id==='imp'){const f=e.target.files[0];if(f)f.text().then(imp)}});
+document.addEventListener('click',e=>{
+ const n=e.target.closest('nav button');if(n){tab=n.dataset.t;render();return}
+ const el=e.target.closest('[data-a]');if(!el)return;const a=el.dataset.a,id=el.dataset.ex;
+ if(a==='start'){let t=Date.now();if(tab==='c'&&calSel!==dk(t)){const p=calSel.split('-'),n=new Date();t=new Date(+p[0],+p[1]-1,+p[2],n.getHours(),n.getMinutes()).getTime()}S.draft={date:t,sets:{}};tab='w';save();render()}
+ else if(a==='editw'){const w=S.workouts.find(q=>q.id===el.dataset.w);if(!w)return;const go=()=>{const sets={};for(const k in w.sets)sets[k]=w.sets[k].map(x=>({w:x.w,r:x.r,x:(x.x||[]).map(q=>({w:q.w,r:q.r}))}));S.draft={date:w.date,sets,editId:w.id};tab='w';save();render()};S.draft?dlg('Текущая незавершённая тренировка будет заменена. Продолжить?',go):go()}
+ else if(a==='addset'){S.draft.sets[id].push({w:'',r:''});save();const y=scrollY;render();scrollTo(0,y)}
+ else if(a==='delset'){const s=S.draft.sets[id];s.splice(+el.dataset.i,1);if(!s.length)s.push({w:'',r:''});save();const y=scrollY;render();scrollTo(0,y)}
+ else if(a==='finish'){const sets={};let any=false;for(const k in S.draft.sets){const v=valid(S.draft.sets[k]);if(v.length){sets[k]=v;any=true}}
+  if(!any){dlg('Запиши хотя бы один подход (вес или повторы)',()=>{});return}
+  const ed=S.draft.editId,wk=S.workouts.find(q=>q.id===ed);if(wk){wk.sets=sets;wk.date=S.draft.date}else S.workouts.push({id:'w'+Date.now(),date:S.draft.date,sets});calSel=dk(S.draft.date);cal=new Date(S.draft.date);S.draft=null;save();tab='c';render()}
+ else if(a==='cancel'){dlg('Отменить текущую тренировку? Введённые данные не сохранятся.',()=>{S.draft=null;save();render()})}
+ else if(a==='addex'){const v=$('#newex').value.trim();if(v){S.ex.push({id:'e'+Date.now(),name:v,g:grp(v)});save();render()}}
+ else if(a==='ren'){const x=S.ex.find(q=>q.id===id);dlg('Название упражнения',v=>{if(v&&v.trim()){x.name=v.trim();save();render()}},x.name)}
+ else if(a==='delex'){dlg('Убрать упражнение из списка?',()=>{S.ex=S.ex.filter(q=>q.id!==id);save();render()})}
+ else if(a==='exp'){const nm='trainings-'+new Date().toISOString().slice(0,10)+'.json',f=new File([JSON.stringify(S)],nm,{type:'application/json'});
+  if(navigator.canShare&&navigator.canShare({files:[f]}))navigator.share({files:[f]}).catch(()=>{});
+  else{const u=URL.createObjectURL(f),l=document.createElement('a');l.href=u;l.download=nm;document.body.appendChild(l);l.click();l.remove();setTimeout(()=>URL.revokeObjectURL(u),3000)}}
+ else if(a==='cpy'){const t=JSON.stringify(S);(navigator.clipboard?navigator.clipboard.writeText(t):Promise.reject()).then(()=>dlg('Данные скопированы. Вставь их в заметки или отправь себе.',()=>{}),()=>dlg('Не удалось скопировать. Используй «Сохранить в файл».',()=>{}))}
+ else if(a==='pst'){dlg('Вставь скопированные данные',v=>imp(v),'')}
+ else if(a==='delw'){dlg('Удалить эту тренировку целиком?',()=>{S.workouts=S.workouts.filter(w=>w.id!==el.dataset.w);save();render()})}
+ else if(a==='delrec'){dlg('Удалить запись этого упражнения из тренировки?',()=>{const w=S.workouts.find(q=>q.id===el.dataset.w);if(w){delete w.sets[id];if(!Object.keys(w.sets).length)S.workouts=S.workouts.filter(q=>q!==w)}save();render()})}
+ else if(a==='adddrop'){const q=S.draft.sets[id][+el.dataset.i];(q.x=q.x||[]).push({w:'',r:''});save();const y=scrollY;render();scrollTo(0,y)}
+ else if(a==='deldrop'){S.draft.sets[id][+el.dataset.i].x.splice(+el.dataset.j,1);save();const y=scrollY;render();scrollTo(0,y)}
+ else if(a==='per'||a==='act'){if(a==='per')per=el.dataset.p;else act=el.dataset.k;const y=scrollY;render();scrollTo(0,y)}
+ else if(a==='qg'){qg=el.dataset.g;const y=scrollY;render();scrollTo(0,y)}
+ else if(a==='addcat'){const it=DBL[+el.dataset.k];S.ex.push({id:'e'+Date.now(),name:it[0],g:it[1]});save();const y=scrollY;render();scrollTo(0,y)}
+ else if(a==='info'){const it=DBL[+el.dataset.k];showInfo(it[0],it[1],it[2])}
+ else if(a==='infoex'){const x=S.ex.find(q=>q.id===id),f=DBL.find(q=>q[0].toLowerCase()===x.name.toLowerCase());showInfo(x.name,gOf(x),f&&f[2])}
+ else if(a==='cprev'||a==='cnext'){cal=new Date(cal.getFullYear(),cal.getMonth()+(a==='cnext'?1:-1),1);const y=scrollY;render();scrollTo(0,y)}
+ else if(a==='cday'){calSel=el.dataset.k;const y=scrollY;render();scrollTo(0,y)}
+ else if(a==='goW'){tab='w';render()}
+ else if(a==='met'){metric=el.dataset.m;render()}
+});
+try{if('serviceWorker' in navigator)navigator.serviceWorker.register('sw.js')}catch(e){}
+render();
+</script></body></html>
